@@ -45,6 +45,9 @@ public class VideoGenerator: NSObject {
   
   /// public property to set a width to scale the image to before generating a video (used only with .single type video generation; preferred scale: 800/1200)
   open var scaleWidth: CGFloat?
+    
+  open var scaleHeight: CGFloat?
+
   
   /// public property to indicate if the images fed into the generator should be resized to appropriate video ratio 1200 x 1920
   open var shouldOptimiseImageForVideo: Bool = true
@@ -549,7 +552,14 @@ public class VideoGenerator: NSObject {
       }
     } else {
       for _image in _images {
-        self.images.append(_image.scaleImageToSize(newSize: CGSize(width: videoImageWidthForMultipleVideoGeneration, height: videoImageWidthForMultipleVideoGeneration)))
+        if let _scaleWidth = scaleWidth,
+            let _scaleHeight = scaleHeight {
+            self.images.append(_image.scaleImageToSize(newSize: CGSize(width: _scaleWidth, height: _scaleHeight)))
+
+        } else {
+            self.images.append(_image.scaleImageToSize(newSize: CGSize(width: videoImageWidthForMultipleVideoGeneration, height: videoImageWidthForMultipleVideoGeneration)))
+
+        }
       }
     }
     
@@ -596,12 +606,13 @@ public class VideoGenerator: NSObject {
       }
     }
     
+    if audioDurations.count == 0 {
+        audioDurations.append(videoDurationInSeconds)
+    }
+    
     let minVideoDuration = Double(CMTime(seconds: minSingleVideoDuration, preferredTimescale: 1).seconds)
     duration = max((audioURLs.isEmpty ? videoDurationInSeconds : _duration), minVideoDuration)
     
-    if let _scaleWidth = scaleWidth {
-      images = images.map({ $0.scaleImageToSize(newSize: CGSize(width: _scaleWidth, height: _scaleWidth)) })
-    }
   }
   
   // MARK: --------------------------------------------------------------- Override methods ---------------------------------------------------------------
@@ -1003,7 +1014,7 @@ public class VideoGenerator: NSObject {
         
         if (noErr == theErr) {
           let dataSize:Int64 = Int64(fileDataSize)
-          let theData = UnsafeMutableRawPointer.allocate(byteCount: Int(dataSize), alignment: MemoryLayout<UInt8>.alignment)
+            let theData = UnsafeMutableRawPointer.allocate(bytes: Int(dataSize), alignedTo: MemoryLayout<UInt8>.alignment)
           
           var readPoint:Int64 = Int64(dataSize)
           var writePoint:Int64 = 0
@@ -1020,7 +1031,7 @@ public class VideoGenerator: NSObject {
             print(1.0 - (CGFloat(readPoint) / CGFloat(dataSize)))
           }
           
-          theData.deallocate()
+            theData.deallocate(bytes: Int(dataSize), alignedTo: MemoryLayout<UInt8>.alignment)
           
           AudioFileClose(inAudioFile)
           AudioFileClose(outAudioFile)
@@ -1096,7 +1107,7 @@ public class VideoGenerator: NSObject {
         /**
          Destroy the pixel buffer pointer from the memory
          */
-        pixelBufferPointer.deallocate()
+        pixelBufferPointer.deallocate(capacity: 1)
       }
     }
     
