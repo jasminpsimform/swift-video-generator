@@ -40,9 +40,9 @@ class LoadingView: UIView {
       indicator.tintColor = .white
       
       if UI_USER_INTERFACE_IDIOM() == .pad {
-        indicator.style = .whiteLarge
+        indicator.activityIndicatorViewStyle = .whiteLarge
       } else {
-        indicator.style = .white
+        indicator.activityIndicatorViewStyle = .white
       }
       indicator.startAnimating()
       loadingView.addSubview(indicator)
