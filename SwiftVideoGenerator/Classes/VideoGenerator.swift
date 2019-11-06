@@ -145,7 +145,7 @@ public class VideoGenerator: NSObject {
         if videoWriter.startWriting() {
           
           /// if it is possible set the start time of the session (current at the begining)
-            videoWriter.startSession(atSourceTime: kCMTimeZero)
+            videoWriter.startSession(atSourceTime: CMTime.zero)
           
           /// check that the pixel buffer pool has been created
           assert(pixelBufferAdaptor.pixelBufferPool != nil)
@@ -658,7 +658,7 @@ public class VideoGenerator: NSObject {
     
     /// create a video asset from the url and get the video time range
     let videoAsset = AVURLAsset(url: videoUrl, options: nil)
-    let videoTimeRange = CMTimeRange(start: kCMTimeZero, duration: videoAsset.duration)
+    let videoTimeRange = CMTimeRange(start: CMTime.zero, duration: videoAsset.duration)
     
     /// add a video track to the composition
     let videoComposition = mixComposition.addMutableTrack(withMediaType: AVMediaType.video, preferredTrackID: kCMPersistentTrackID_Invalid)
@@ -666,7 +666,7 @@ public class VideoGenerator: NSObject {
     if let videoTrack = videoAsset.tracks(withMediaType: .video).first {
       do {
         /// try to insert the video time range into the composition
-        try videoComposition?.insertTimeRange(videoTimeRange, of: videoTrack, at: kCMTimeZero)
+        try videoComposition?.insertTimeRange(videoTimeRange, of: videoTrack, at: CMTime.zero)
       } catch {
         failure(error)
       }
@@ -681,7 +681,7 @@ public class VideoGenerator: NSObject {
         let audioDuration = CMTime(seconds: audioDurations[index], preferredTimescale: 1)
         
         let audioAsset = AVURLAsset(url: audioUrl)
-        let audioTimeRange = CMTimeRange(start: kCMTimeZero, duration: maxVideoLengthInSeconds != nil ? audioDuration : audioAsset.duration)
+        let audioTimeRange = CMTimeRange(start: CMTime.zero, duration: maxVideoLengthInSeconds != nil ? audioDuration : audioAsset.duration)
         
         let shouldAddAudioTrack = maxVideoLengthInSeconds != nil ? audioDuration.seconds > 0 : true
         
@@ -1014,7 +1014,7 @@ public class VideoGenerator: NSObject {
         
         if (noErr == theErr) {
           let dataSize:Int64 = Int64(fileDataSize)
-            let theData = UnsafeMutableRawPointer.allocate(bytes: Int(dataSize), alignedTo: MemoryLayout<UInt8>.alignment)
+            let theData = UnsafeMutableRawPointer.allocate(byteCount: Int(dataSize), alignment: MemoryLayout<UInt8>.alignment)
           
           var readPoint:Int64 = Int64(dataSize)
           var writePoint:Int64 = 0
@@ -1031,8 +1031,8 @@ public class VideoGenerator: NSObject {
             print(1.0 - (CGFloat(readPoint) / CGFloat(dataSize)))
           }
           
-            theData.deallocate(bytes: Int(dataSize), alignedTo: MemoryLayout<UInt8>.alignment)
-          
+         theData.deallocate()
+            
           AudioFileClose(inAudioFile)
           AudioFileClose(outAudioFile)
           
@@ -1107,7 +1107,7 @@ public class VideoGenerator: NSObject {
         /**
          Destroy the pixel buffer pointer from the memory
          */
-        pixelBufferPointer.deallocate(capacity: 1)
+        pixelBufferPointer.deallocate()
       }
     }
     

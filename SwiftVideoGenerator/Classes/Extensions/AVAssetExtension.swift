@@ -85,7 +85,9 @@ extension AVAsset {
         completion(true, nil)
       case .unknown, .waiting, .exporting, .failed, .cancelled:
         completion(false, nil)
-      }
+      @unknown default:
+        completion(false, nil)
+        }
     }
   }
   
